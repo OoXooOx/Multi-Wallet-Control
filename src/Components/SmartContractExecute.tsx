@@ -122,7 +122,6 @@ function SmartContractExecute() {
             const newTypes = [...types];
             newTypes[index] = { type: e.target.value };
             setTypes(newTypes);
-            console.log(types);
         } catch (error: any) {
             console.log(error);
             setErrorR(error.message)
@@ -195,7 +194,6 @@ function SmartContractExecute() {
                         nonce: currentNonce
                     };
                     const signedTx = await el.signTransaction(tx);
-                    console.log(signedTx);
                     const sendTx = await provider.sendTransaction(signedTx);
                     setTxHash(prevState => [...prevState, sendTx.hash])
                     await sendTx.wait(confirmations);
