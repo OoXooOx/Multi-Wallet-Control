@@ -81,7 +81,6 @@ function SmartContractExecute() {
                 setInputsValue(newInput);
                 const newType = [...types, { type: "address" }];
                 setTypes(newType);
-                console.log(types);
             }
         } catch (error: any) {
             console.log(error);
