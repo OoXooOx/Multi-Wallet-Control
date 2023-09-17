@@ -22,6 +22,7 @@ function SmartContractExecute() {
     const [inputsValue, setInputsValue] = useState<Input[]>([]);
     const [types, setTypes] = useState<Array<{ type: string }>>([])
     const [rpcProvider, setRpcProvider] = useState<string>();
+    const [nonce, setNonce] = useState<number>();
     const [chainId, setChainId] = useState<number>();
     const [dataTx, setDataTx] = useState<string>();
     const [txHash, setTxHash] = useState<string[]>([]);
@@ -44,6 +45,9 @@ function SmartContractExecute() {
     }
     const handleGasPriceInGwei = (e: any) => {
         setGasPriceInGwei(e.target.value);
+    }
+    const handleNonceChange = (e: any) => {
+        setNonce(e.target.value);
     }
     const handleNumberConfirmations = (e: any) => {
         setNumberConfirmations(e.target.value);
@@ -148,6 +152,79 @@ function SmartContractExecute() {
         }
     }
 
+    const txHashDismiss = () => {
+        setTxHash([]);
+        setErrorR("");
+    }
+
+    const getDataWithAddress = (address: string) => {
+        try {
+            setErrorR("")
+            const ABI = [{
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "chainId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "recipient",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amountOutMin",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "deadline",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "relayer",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "relayerFee",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "sendToL2",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function"
+            }]
+            // const inputsVal = [...inputsValue];
+            // const inputValues = inputsVal.map(el => el.value)
+            const iface = new ethers.utils.Interface(ABI);
+            const data = iface.encodeFunctionData("sendToL2", [
+                59140,
+                address,
+                ethers.utils.parseEther("0.4"),
+                ethers.utils.parseEther("0.387161270336881238"),
+                1681414271,
+                "0x81682250D4566B2986A2B33e23e7c52D401B7aB7",
+                ethers.utils.parseEther("0.010000000000000123"),
+
+            ]);
+            setDataTx(data)
+            return data;
+        } catch (error: any) {
+            console.log(error);
+            setErrorR(error.message)
+        }
+    }
+
+
     const limitGas = async (address: string) => {
         try {
             const limit = await provider.estimateGas({
@@ -190,7 +267,7 @@ function SmartContractExecute() {
                         value: amountToSend ? ethers.utils.parseEther(amountToSend.toString()) : 0,
                         gasPrice: gasPrice,
                         gasLimit: GasLimit,
-                        nonce: currentNonce
+                        nonce: Number(nonce ? nonce : currentNonce)
                     };
                     const signedTx = await el.signTransaction(tx);
                     const sendTx = await provider.sendTransaction(signedTx);
@@ -236,7 +313,7 @@ function SmartContractExecute() {
                             <p></p>
                             <Image className="siteCover" src={ManyToOne} />
                         </div>
-                        <div className="item3" data-title="It's goerli chainId by default. You can change this field. Insert only numbers here.">
+                        <div className="item6" data-title="It's goerli chainId by default. You can change this field. Insert only numbers here.">
                             <input
                                 type="number"
                                 name="chainId"
@@ -246,7 +323,7 @@ function SmartContractExecute() {
                                 value={chainId || ""} />
                         </div>
 
-                        <div className="item2" data-title="It's goerli provider by default. You can paste here any other provider for other chain.
+                        <div className="item5" data-title="It's goerli provider by default. You can paste here any other provider for other chain.
                         Something like this https://eth-goerli.public.blastapi.io">
                             <input
                                 type="text"
@@ -256,14 +333,33 @@ function SmartContractExecute() {
                                 onChange={handleRpcProviderChange}
                                 value={rpcProvider || ""} />
                         </div>
+                        <div className="item5" data-title="Optional nonce. Don't touch nonce if you not sure that you need this. 
+                                You must understand that you set here same nonce for all transactions within batch.">
+                            <input
+                                type="number"
+                                name="nonce"
+                                className="input input-bordered block w-full focus:ring focus:outline-none"
+                                placeholder="nonce (optionally)"
+                                onChange={handleNonceChange}
+                                value={nonce || ""} />
+
+                        </div>
                     </Col>
 
                     <Col>
                         {txHash.length
                             ? <div className='data'>
                                 {txHash.map((el, index) => (
-                                    <p key={index}>{"hash :" + " " + el}</p>
+                                    <div>
+                                        <p key={index}>{index + 1 + ". hash :" + " " + el}</p>
+                                        <div className="alerts ">{errorR} </div>
+                                    </div>
+
                                 ))}
+
+                                <div>
+                                    <Button onClick={txHashDismiss}>Dismiss</Button>
+                                </div>
                             </div>
                             : <div>
                                 <form>
@@ -343,6 +439,11 @@ function SmartContractExecute() {
                                                             <option value={"bool"}>bool</option>
                                                             <option value={"bytes"}>bytes</option>
                                                             <option value={"bytes32"}>bytes32</option>
+                                                            <option value={"uint8"}>uint8</option>
+                                                            <option value={"uint16"}>uint16</option>
+                                                            <option value={"uint32"}>uint32</option>
+                                                            <option value={"uint64"}>uint64</option>
+                                                            <option value={"uint128"}>uint128</option>
                                                         </select>
                                                         <input
                                                             type="text"

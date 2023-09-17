@@ -15,6 +15,7 @@ function SendRawTransactions() {
     const inputRef = useRef(null);
     const [rpcProvider, setRpcProvider] = useState<string>();
     const [chainId, setChainId] = useState<number>();
+    const [nonce, setNonce] = useState<number>();
     const [txHash, setTxHash] = useState<string[]>([]);
 
     const handleRecipentAddressChange = (e: any) => {
@@ -34,6 +35,9 @@ function SendRawTransactions() {
     }
     const handleChainIdChange = (e: any) => {
         setChainId(e.target.value);
+    }
+    const handleNonceChange = (e: any) => {
+        setNonce(e.target.value);
     }
     const isValidAddress = (address: string) => {
         return ethers.utils.isAddress(address);
@@ -56,6 +60,15 @@ function SendRawTransactions() {
         }
     }
 
+
+
+    // 45  46
+    // const x = ()=> prev
+    // setAttemptCount(   attemptCount
+    //     (prevState) => prevState + 1
+    //         46
+    //     )
+
     const handleSendMultiTransactions = async () => {
         try {
             setErrorR("")
@@ -71,6 +84,7 @@ function SendRawTransactions() {
             if (numberConfirmations) {
                 confirmations = numberConfirmations;
             }
+
             for (const el of wallets) {
                 try {
                     const currentNonce = await provider.getTransactionCount(el.address);
@@ -80,9 +94,13 @@ function SendRawTransactions() {
                         value: ethers.utils.parseEther(amountToSend!.toString()),
                         gasPrice: gasPrice,
                         gasLimit: 21000,
-                        nonce: currentNonce
+                        nonce: Number(nonce ? nonce : currentNonce),
                     };
+                    console.log("tx", tx);
+
                     const signedTx = await el.signTransaction(tx);
+                    console.log(signedTx);
+
                     const sendTx = await provider.sendTransaction(signedTx);
                     setTxHash(prevState => [...prevState, sendTx.hash])
                     await sendTx.wait(confirmations);
@@ -97,6 +115,7 @@ function SendRawTransactions() {
             setErrorR(error.message)
         }
     }
+    //onClick onBlur onFocus on  756
 
 
     return (
@@ -134,6 +153,7 @@ function SendRawTransactions() {
                                 placeholder="chainId (optionally)"
                                 onChange={handleChainIdChange}
                                 value={chainId || ""} />
+
                         </div>
                         <div className="item2" data-title="It's goerli provider by default. You can paste here any other provider for other chain.
                         Something like this https://eth-goerli.public.blastapi.io">
@@ -145,6 +165,7 @@ function SendRawTransactions() {
                                 onChange={handleRpcProviderChange}
                                 value={rpcProvider || ""} />
                         </div>
+
                     </Col>
 
                     <Col>
@@ -155,7 +176,7 @@ function SendRawTransactions() {
                                 ))}
                             </div>
                             : <form>
-                                <div className="item" data-title="Paste here only address of user wallet,
+                                <div className="item1" data-title="Paste here only address of user wallet,
                              don't paste here address of smart contract. If you do it, you must know that gas
                               limit will be set to 21000 in this case.">
                                     <input
@@ -186,6 +207,17 @@ function SendRawTransactions() {
                                         placeholder="comfirmations (optionally)"
                                         onChange={handleNumberConfirmations}
                                         value={numberConfirmations || ""} />
+                                </div>
+                                <div className="item3" data-title="Optional nonce. Don't touch nonce if you not sure that you need this. 
+                                You must understand that you set here same nonce for all transactions within batch.">
+                                    <input
+                                        type="number"
+                                        name="nonce"
+                                        className="input input-bordered block w-full focus:ring focus:outline-none"
+                                        placeholder="nonce (optionally)"
+                                        onChange={handleNonceChange}
+                                        value={nonce || ""} />
+
                                 </div>
                                 <div className="item" data-title="If you do not change this field, the default gas price will be used.
                You can change this. Enter here the gas price in Gwei.">

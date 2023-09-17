@@ -153,6 +153,11 @@ input[type=number] {
   height: 100px;
   width: 100px;
 }
+
+.linkImg1{
+  height: 92px;
+  width: 92px;
+}
 .contact{
   display: flex;
   flex-direction: row;
@@ -215,3 +220,61 @@ input[type=number] {
   opacity: 1;
   transform: translateY(0);  
 }
+
+
+.item5{
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.item5:after{
+  content: attr(data-title);
+  position: absolute;
+  top: -150px;
+  left: 0px;
+  width: 300px;
+  background: rgb(4, 66, 87);
+  border-radius: 30px;
+  padding: 14px 20px;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition:0.34s linear;
+  color: #fff;
+  box-shadow:0 5px 12px #ccc;
+  pointer-events: none;
+}
+
+.item5:hover:after{
+  opacity: 1;
+  transform: translateY(0);  
+}
+
+.item6{
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.item6:after{
+  content: attr(data-title);
+  position: absolute;
+  top: -100px;
+  left: 0px;
+  width: 300px;
+  background: rgb(4, 66, 87);
+  border-radius: 30px;
+  padding: 14px 20px;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition:0.34s linear;
+  color: #fff;
+  box-shadow:0 5px 12px #ccc;
+  pointer-events: none;
+}
+
+.item6:hover:after{
+  opacity: 1;
+  transform: translateY(0);  
+}
+
